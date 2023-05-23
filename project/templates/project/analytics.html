@@ -1,0 +1,47 @@
+{% extends 'project/base.html' %}
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+{% endblock %}
+
+
+
+{% block content %}
+<div class="container">
+
+
+    <div id="plot-outlet">
+        <canvas id="line-chart" width="800" height="450"></canvas>
+    </div>
+
+</div>
+
+
+{{ revenue_by_date|json_script:"revenue_by_date" }}
+
+<script type="text/javascript">
+    const revenueByDate = JSON.parse(document.getElementById('revenue_by_date').textContent);
+
+    new Chart(document.getElementById("line-chart"), {
+        type: 'line',
+        data: {
+            labels: Object.keys(revenueByDate),
+            datasets: [{
+                data: Object.values(revenueByDate),
+                label: "Koszta",
+                borderColor: "#3e95cd",
+                fill: false
+            }
+            ]
+        },
+        options: {
+            title: {
+                display: true,
+                text: 'Prezentacja kosztów'
+            }
+        }
+    });
+</script>
+
+
+
+{% endblock %}

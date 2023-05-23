@@ -1,0 +1,47 @@
+
+{% extends 'project/base_generic.html' %}
+{% block content %}
+<!--
+    <div class="container">
+        <div id="title">
+            <h1>Add customer</h1>
+        </div>
+        <form action="/project/add-customer" method="post">
+            {% csrf_token %}
+            {% for form_field in form %}
+            <div class="form-group">
+                {{ form_field.label_tag }}
+                {{ form_field }}
+            </div>
+            {% endfor %}
+            <button class="btn btn-success" type="submit">SUBMIT</button>
+        </form>
+    </div>
+-->
+
+    <div class="container">
+    <div id="title">
+        <h1>Dodaj klienta</h1>
+
+    </div>
+    <form action="/project/add-customer" method="post">{% csrf_token %}
+        <div class="mb-3">
+  <label for="Customer" class="form-label">Imię:</label><br>
+  <input type="text" class="form-control" name="customername" placeholder="Wpisz imię"><br>
+            <div class="mb-3">
+  <label for="Surname" class="form-label">Nazwisko:</label><br>
+  <input type="text" class="form-control" name="surname" placeholder="Wpisz nazwisko"><br>
+                <div class="mb-3">
+          <label for="Age" class="form-label">Wiek:</label><br>
+  <input type="number" class="form-control" name="age" placeholder="Wpisz wiek"><br>
+                    <div class="mb-3">
+          <label for="exampleInputEmail1" class="form-label">Email:</label><br>
+  <input type="email" class="form-control"  name="email" placeholder="Wpisz email"><br>
+
+  <input type="submit" class="btn btn-primary" value="Dodaj">
+
+</form>
+</div>
+
+<div id="clock" class="clock-container"></div>
+{% endblock %}

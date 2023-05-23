@@ -1,0 +1,78 @@
+{% extends 'project/base_generic.html' %}
+
+{% block content %}
+<div class="container">
+    <div id="title">
+        <h1>Kupione bilety - {{ customer.customername }}</h1>
+    </div>
+
+    <div id="clock" class="clock-container"></div>
+
+    <div id="customer-summary">
+        <h3>Historia wycieczek</h3>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Wiek</th>
+                <th scope="col">E-mail</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ customer.customername }}</td>
+                <td>{{ customer.surname }}</td>
+                <td>{{ customer.age }}</td>
+                <td>{{ customer.email }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div>
+        <h3>Bilety:</h3>
+        {% if transactions|length != 0 %}
+            <form action="/project/transactions-csv" method="get">
+                <input type="hidden" name="user_id" value="{{ customer.id }}">
+                <button class="btn btn-primary" type="submit">Pobierz jako CSV</button>
+            </form>
+            <br>
+            {% for txn in transactions %}
+            <p><b>Zakup - {{ txn.date }}</b></p>
+            <p>Cała kwota: {{ txn.total }}</p>
+            <table class="table table-hover">
+                <thead>
+                <tr>
+                    <th scope="col">Miejsce</th>
+                    <th scope="col">Zniżka</th>
+                    <th scope="col">Cena wycieczki</th>
+                    <th scope="col">Ostateczna cena</th>
+                    <th scope="col">Wydrukuj bilet</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in txn.items.all %}
+                <tr>
+                    <td>{{ item.item.tripname }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>{{ item.item.price }}</td>
+                    <td>{{ item.subtotal }}</td>
+                    <td>
+                        <form action="/project/transactions-pdf" method="get">
+                        <input type="hidden" name="user_id" value="{{ customer.id }}">
+                        <button class="btn btn-primary" type="submit">Pobierz jako PDF</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% endfor %}
+            {% else %}
+            <p>Brak kupionych wycieczek</p>
+        {%endif%}
+    </div>
+
+</div>
+{% endblock %}

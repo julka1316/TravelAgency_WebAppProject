@@ -1,0 +1,221 @@
+{% extends 'project/base_generic.html' %}
+
+{% block content %}
+<div class="container">
+    <div id="title">
+        <h1></h1>
+         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+          crossorigin="anonymous">
+    </div>
+
+    <div id="clock" class="clock-container"></div>
+
+    <div id="customer-selection-component">
+        <h5>Wybierz klienta</h5>
+        <input class="form-control" type="text" id="customer-search-input" placeholder="Wyszukaj klienta..." onkeyup="onCustomerSearchChange()">
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Wiek</th>
+                <th scope="col">Email</th>
+                <th scope="col">Wybierz</th>
+            </tr>
+            </thead>
+            <tbody id="customer-rows-outlet">
+                <tr>
+                    <td>...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="product-selection-component">
+        <h5>Wybierz wycieczkę</h5>
+        <input class="form-control" type="text" id="product-search-input" placeholder="Wyszukaj wycieczki..." onkeyup="onProductSearchChange()">
+
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Miejsce</th>
+                <th scope="col">Data odjazdu</th>
+                <th scope="col">Data przyjazdu</th>
+                <th scope="col">Cena (PLN)</th>
+                <th scope="col">Zniżka</th>
+                <th scope="col">Dodaj wycieczkę</th>
+            </tr>
+            </thead>
+            <tbody id="product-rows-outlet">
+                <tr>
+                    <td>...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="order-summary-component">
+        <h5>Podsumowanie zamówienia</h5>
+        <span id="selected-customer-holder">
+            <b>Klient:</b>
+
+        </span>
+                <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Wiek</th>
+                <th scope="col">Email</th>
+            </tr>
+            </thead>
+            <tbody id="selected-customer-details">
+                <tr>
+                    <td>Nie wybrano jeszcze żadnego klienta</td>
+                </tr>
+            </tbody>
+        </table>
+
+
+
+        <span id="selected-products-label-holder">
+            <b>Wycieczki:</b>
+        </span>
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th scope="col">Miejsce</th>
+                <th scope="col">Data odjazdu</th>
+                <th scope="col">Cena (PLN)</th>
+                <th scope="col">Zniżka</th>
+                <th scope="col">Cena ostateczna</th>
+            </tr>
+            </thead>
+            <tbody id="selected-product-rows-outlet">
+                <tr>
+                    <td>Nie wybrano jeszcze żadnych wycieczek</td>
+                </tr>
+            </tbody>
+        </table>
+        <span id="summary-order-total-holder">
+            <b>Cena ostateczna:</b>
+            <p id="summary-order-total">0.00</p>
+        </span>
+    </div>
+
+    <form action="/project/buy-ticket" method="post">
+        {% csrf_token %}
+        <input id="submit-order-form-payload-input" type="hidden" name="order_payload">
+        <button class="btn btn-primary" type="submit">Zatwierdź zamówienie
+
+</div>
+
+{{ customers|json_script:"customers" }}
+{{ products|json_script:"products" }}
+
+<script type="text/javascript">
+    const customers = JSON.parse(document.getElementById('customers').textContent);
+    const products = JSON.parse(document.getElementById('products').textContent);
+
+    let customersMap = {};
+    customers.forEach(c => {
+        const key = `${c.customername}, ${c.surname} ${c.age} ${c.email} (ID ${c.id})`;
+        customersMap[key] = c;
+    });
+
+    let productsMap = {};
+    products.forEach(p => {
+        const key = `${p.tripname} ${p.date} ${p.price} (ID ${p.id})`;
+        productsMap[key] = p;
+    });
+
+
+    function onCustomerSearchChange() {
+        const searchString = document.getElementById('customer-search-input').value;
+        let matchedCustomersRadioButtonHtmls = [];
+        Object.keys(customersMap).forEach(key => {
+            if (key.search(searchString) !== -1) {
+                matchedCustomersRadioButtonHtmls = [...matchedCustomersRadioButtonHtmls, `<tr><td>${customersMap[key].customername}</td><td>${customersMap[key].surname}</td><td>${customersMap[key].age}</td><td>${customersMap[key].email}</td><td><button class="btn btn-primary" id="product-add-button-${customersMap[key].id}" onClick="onSelectCustomerButtonClick(${customersMap[key].id})">Wybierz</button></td></tr>`]
+            }
+        });
+
+        document.getElementById('customer-rows-outlet').innerHTML = searchString === '' ? '<tr><td>Type something...</td></tr>' : matchedCustomersRadioButtonHtmls.join('');
+
+    }
+
+
+    let selectedCustomerId = -1;
+    function onSelectCustomerButtonClick(customerId) {
+        selectedCustomerId = customerId;
+        updateSummary();
+    }
+
+    function onProductSearchChange() {
+        const searchString = document.getElementById('product-search-input').value;
+        let matchedProductsRowsHtmls = [];
+        Object.keys(productsMap).forEach(key => {
+            if (key.search(searchString) !== -1) {
+                matchedProductsRowsHtmls = [...matchedProductsRowsHtmls, `<tr><td>${productsMap[key].tripname}</td><td>${productsMap[key].date_1}</td><td>${productsMap[key].date_2}</td><td>${productsMap[key].price}</td><td><input class="form-control" type="number" step="0.01" id="product-quantity-input-${productsMap[key].id}" required=True, placeholder="Zniżka..."></td><td><button class="btn btn-primary" id="product-add-button-${productsMap[key].id}" onclick="onAddProductButtonClick(${productsMap[key].id})">Dodaj</button></td></tr>`]
+            }
+        });
+
+        document.getElementById('product-rows-outlet').innerHTML = searchString === '' ? '<tr><td>Type something...</td></tr>' : matchedProductsRowsHtmls.join('');
+    }
+
+    let addedProducts = [];
+    function onAddProductButtonClick(productId) {
+        const productQuantity = document.getElementById(`product-quantity-input-${productId}`).value
+        addedProducts = [
+            ...addedProducts,
+            {
+                id: productId,
+                quantity: productQuantity
+            }
+        ];
+
+        updateSummary();
+    }
+
+    function updateSummary() {
+        const customerIdDescMap = {};
+        customers.forEach(c => {
+            customerIdDescMap[c.id] = `<tr><td>${c.customername}</td><td>${c.surname}</td><td>${c.age}</td><td>${c.email}</td></tr>`;
+        });
+
+        const productIdMap = {};
+        products.forEach(p => {
+            productIdMap[p.id] = p;
+        });
+
+        const htmls = addedProducts.map(p => {
+            return `<tr><td>${productIdMap[p.id].tripname}</td><td>${productIdMap[p.id].date_1}</td><td>${productIdMap[p.id].price}</td><td>${p.quantity}</td><td>${productIdMap[p.id].price-(p.quantity*productIdMap[p.id].price)}</td></tr>`
+        });
+
+        let total = 0;
+        addedProducts.forEach(p => {
+            total = total + (productIdMap[p.id].price - (productIdMap[p.id].price * p.quantity));
+        });
+
+        document.getElementById('selected-customer-details').innerHTML = selectedCustomerId === -1 ? 'No customer selected' : customerIdDescMap[selectedCustomerId];
+        document.getElementById('selected-product-rows-outlet').innerHTML = htmls.join('');
+        document.getElementById('summary-order-total').innerHTML = total;
+
+        const payload = {
+            user_id: selectedCustomerId,
+            items: [...addedProducts]
+        };
+
+        document.getElementById('submit-order-form-payload-input').value = JSON.stringify(payload);
+    }
+
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.7/dist/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+
+
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'project/base_generic.html' %}
+
+{% block content %}
+
+<div class="container">
+    <div id="title">
+        <h1>Dodaj wycieczkę</h1>
+    </div>
+    <form action="/project/add-trip" method="post" enctype="multipart/form-data">{% csrf_token %}
+        <div class="mb-3">
+  <label for="Tripname" class="form-label">Miejsce:</label><br>
+  <input type="text" class="form-control" name="tripname" placeholder="Wpisz nazwę miejsca">
+        </div>
+            <div class="mb-3">
+  <label for="description" class="form-label">Opis:</label><br>
+                <textarea class="form-control" name="description" rows ="3" placeholder="Wpisz opis miejsca"></textarea>
+            </div>
+                <div class="mb-3">
+  <label for="date_1" class="form-label">Data odjazdu:</label><br>
+  <input type="date" class="form-control" name="date_1">
+            </div>
+                        <div class="mb-3">
+  <label for="date_2" class="form-label">Data powrotu:</label><br>
+  <input type="date" class="form-control" name="date_2">
+            </div>
+                    <div class="mb-3">
+  <label for="price" class="form-label">Cena (PLN):</label><br>
+  <input type="number" class="form-control" name="price" placeholder="Wpisz cenę"><br><br>
+            </div>
+
+                     <div class="mb-3">
+  <label for="image"></label><br>
+  <input type="file"  name="image" ><br><br>
+            </div>
+
+    <div class="mb-3">
+  <input type="submit" class= "btn btn-primary" value="Dodaj">
+    </div>
+</form>
+</div>
+
+<div id="clock" class="clock-container"></div>
+
+{% endblock %}
+
+
+<!--
+<div class="container">
+    <div id="title">
+        <h1>Add product</h1>
+    </div>
+    <form action="/project/add-trip" method="post">
+        {% csrf_token %}
+        {% for form_field in form %}
+        <div class="form-group">
+            {{ form_field.label_tag }}
+            {{ form_field }}
+        </div>
+        {% endfor %}
+        <button class="btn btn-success" type="submit">SUBMIT</button>
+    </form>
+</div>
+
+-->
+
+
+
+

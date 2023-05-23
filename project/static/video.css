@@ -1,0 +1,11 @@
+.video-container {
+    display: flex;
+    justify-content: center;
+    height: 100vh;
+  }
+  
+  .video-container iframe {
+    width: 560px;
+    height: 315px;
+  }
+  
